@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IEX Market Query Assistant</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f4f6f8;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    h1 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #0078D4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #005ea6;
+    }
+    .response {
+      margin-top: 20px;
+      white-space: pre-wrap;
+      background: #f0f0f0;
+      padding: 15px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+    }
+    #loadingBar {
+      margin-top: 15px;
+      text-align: center;
+      color: #0078D4;
+      font-weight: bold;
+    }
+    #questionType {
+      margin-top: 10px;
+      color: #0078D4;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>IEX Query Assistant</h1>
+    <textarea id="queryBox" placeholder="Ask something like: What were the purchase and sell bids at hour 1 on 19-5-2025?"></textarea>
+    <button onclick="sendQuery()">Ask</button>
+    
+    <div id="loadingBar" style="display:none;">
+      <p>Analyzing... Please wait</p>
+      <progress max="100" value="50" style="width: 100%;"></progress>
+    </div>
+    
+    <div id="questionType"></div>
+    <div class="response" id="responseBox"></div>
+  </div>
+
+  <script>
+    async function sendQuery() {
+      const query = document.getElementById("queryBox").value;
+      const responseBox = document.getElementById("responseBox");
+      const loadingBar = document.getElementById("loadingBar");
+      const questionTypeBox = document.getElementById("questionType");
+
+      responseBox.innerText = "";
+      questionTypeBox.innerText = "";
+      loadingBar.style.display = "block";
+
+      try {
+        const response = await fetch("/query", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query })
+        });
+
+        const data = await response.json();
+        responseBox.innerText = data.answer || data.error || "No response.";
+        questionTypeBox.innerText = data.question_type ? `Detected Question Type: ${data.question_type}` : "";
+      } catch (err) {
+        responseBox.innerText = "Error contacting the backend.";
+        console.error(err);
+      } finally {
+        loadingBar.style.display = "none";
+      }
+    }
+  </script>
+</body>
+</html>

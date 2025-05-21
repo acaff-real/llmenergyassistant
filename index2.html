@@ -69,14 +69,14 @@
 <body>
   <div class="container">
     <h1>IEX Query Assistant</h1>
-    <textarea id="queryBox" placeholder="Ask something like: What were the purchase and sell bids at hour 1 on 19-5-2025?"></textarea>
+    <textarea id="queryBox" placeholder="Ask something like: How's the market looking?"></textarea>
     <button onclick="sendQuery()">Ask</button>
-    
+
     <div id="loadingBar" style="display:none;">
       <p>Analyzing... Please wait</p>
       <progress max="100" value="50" style="width: 100%;"></progress>
     </div>
-    
+
     <div id="questionType"></div>
     <div class="response" id="responseBox"></div>
   </div>
@@ -100,14 +100,32 @@
         });
 
         const data = await response.json();
-        responseBox.innerText = data.answer || data.error || "No response.";
+
         questionTypeBox.innerText = data.question_type ? `Detected Question Type: ${data.question_type}` : "";
+
+        // Typewriter effect
+        const text = data.answer || data.error || "No response.";
+        typeWriterEffect(text, responseBox);
       } catch (err) {
         responseBox.innerText = "Error contacting the backend.";
         console.error(err);
       } finally {
         loadingBar.style.display = "none";
       }
+    }
+
+    function typeWriterEffect(text, element, delay = 5) {
+      element.innerText = "";
+      let i = 0;
+      function type() {
+        if (i < text.length) {
+          element.innerText += text.charAt(i);
+          i++;
+          setTimeout(type, delay);
+          element.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+      }
+      type();
     }
   </script>
 </body>
